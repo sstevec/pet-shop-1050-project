@@ -69,16 +69,18 @@ const App = {
             ) {
 
                 const breedName = await adoptionInstance.methods.getBreed(pet.breedId).call();
+                const voteCount = await adoptionInstance.methods.getVoteCount(i).call();
 
                 const petCard = document.createElement("div");
                 petCard.className = "pet-card";
                 petCard.innerHTML = `
-                <h3>${pet.name}</h3>
+                <h3>${pet.name} (Votes: ${voteCount})</h3>
                 <img src="${pet.image}" alt="${pet.name}">
                 <p>Age: ${pet.age}</p>
                 <p>Breed: ${breedName}</p>
                 <p>Location: ${pet.location}</p>
                 <button class="btn-adopt" data-id="${i}">Adopt</button>
+                <button class="btn-vote" data-id="${i}">Vote</button>
             `;
                 petsContainer.appendChild(petCard);
             }
@@ -185,6 +187,9 @@ const App = {
         document.querySelectorAll(".btn-adopt").forEach((button) =>
             button.addEventListener("click", App.handleAdopt)
         );
+        document.querySelectorAll(".btn-vote").forEach((button) =>
+            button.addEventListener("click", App.handleVote)
+        );
     },
 
     handleAdopt: async function (event) {
@@ -201,6 +206,24 @@ const App = {
             App.loadAdoptedPets();
         } catch (error) {
             console.error(error.message);
+        }
+    },
+
+    handleVote: async function (event) {
+        event.preventDefault();
+
+        const petId = parseInt(event.target.getAttribute("data-id"));
+        const accounts = await web3.eth.getAccounts();
+        const account = accounts[0];
+
+        const adoptionInstance = await App.adoptionContract;
+
+        try {
+            await adoptionInstance.methods.voteForPet(petId).send({ from: account });
+            alert("Vote cast successfully!");
+            App.loadPets(); // Reload the pet list to update vote counts
+        } catch (error) {
+            console.error("Error voting for pet:", error.message);
         }
     },
 };

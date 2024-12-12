@@ -9,6 +9,7 @@ contract Adoption {
         string location;
         string image; // URL or IPFS hash for the pet's image
         address adopter;
+        uint voteCount; // Add vote count
     }
 
     struct Breed {
@@ -63,7 +64,6 @@ contract Adoption {
     }
 
 
-
     function addNewPet(
         string memory name,
         uint age,
@@ -75,7 +75,7 @@ contract Adoption {
         require(breedId < breedCount, "Invalid breed ID");
 
         // Add new pet to the pets mapping
-        pets[petCount] = Pet(name, age, breedId, location, image, address(0));
+        pets[petCount] = Pet(name, age, breedId, location, image, address(0), 0);
         petCount++;
     }
 
@@ -120,6 +120,19 @@ contract Adoption {
         return breeds[breedId].name;
     }
 
+    function voteForPet(uint petId) public {
+        require(petId >= 0 && petId < petCount, "Invalid pet ID");
+        require(pets[petId].adopter == address(0), "Cannot vote for adopted pets");
+
+        pets[petId].voteCount += 1;
+    }
+
+    function getVoteCount(uint petId) public view returns (uint) {
+        require(petId >= 0 && petId < petCount, "Invalid pet ID");
+
+        return pets[petId].voteCount;
+    }
+
     // Admin function to initialize pets and breeds
     function initializeData(
         string[] memory names,
@@ -137,7 +150,7 @@ contract Adoption {
 
         // Initialize pets
         for (uint i = 0; i < names.length; i++) {
-            pets[i] = Pet(names[i], ages[i], breedIds[i], locations[i], images[i], address(0));
+            pets[i] = Pet(names[i], ages[i], breedIds[i], locations[i], images[i], address(0), 0);
         }
         petCount = names.length;
     }
