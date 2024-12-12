@@ -27,6 +27,26 @@
 <body>
 <h1>Pet Adoption</h1>
 <div>
+  <h2>Filter Pets</h2>
+  <form id="filter-form">
+    <label for="filter-breed">Breed:</label>
+    <select id="filter-breed">
+      <option value="">All Breeds</option>
+    </select><br>
+
+    <label for="filter-name">Name:</label>
+    <input type="text" id="filter-name" placeholder="Enter pet name"><br>
+
+    <label for="filter-min-age">Min Age:</label>
+    <input type="number" id="filter-min-age" placeholder="0"><br>
+
+    <label for="filter-max-age">Max Age:</label>
+    <input type="number" id="filter-max-age" placeholder="99"><br>
+
+    <button type="submit" id="apply-filters">Apply Filters</button>
+  </form>
+</div>
+<div>
   <h2>Available Pets</h2>
   <div id="pets-container"></div>
 </div>

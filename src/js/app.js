@@ -13,7 +13,7 @@ const App = {
             App.web3Provider = window.ethereum;
             try {
                 // Request account access
-                await window.ethereum.request({ method: "eth_requestAccounts" });
+                await window.ethereum.request({method: "eth_requestAccounts"});
             } catch (error) {
                 console.error("User denied account access");
             }
@@ -45,8 +45,15 @@ const App = {
         return App.loadPets();
     },
 
-    loadPets: async function () {
+    loadPets: async function (event) {
+        if (event) event.preventDefault();
         const adoptionInstance = await App.adoptionContract;
+
+        const breedId = document.getElementById("filter-breed").value;
+        const name = document.getElementById("filter-name").value.toLowerCase();
+        const minAge = parseInt(document.getElementById("filter-min-age").value) || 0;
+        const maxAge = parseInt(document.getElementById("filter-max-age").value) || 99;
+
         const petCount = await adoptionInstance.methods.getPetCount().call();
 
         const petsContainer = document.getElementById("pets-container");
@@ -55,26 +62,27 @@ const App = {
         for (let i = 0; i < petCount; i++) {
             const pet = await adoptionInstance.methods.getPet(i).call();
 
-            // Skip if pet is not available
-            if (pet.adopter !== "0x0000000000000000000000000000000000000000") {
-                continue;
+            if (
+                (breedId === "" || pet.breedId === breedId) &&
+                (name === "" || pet.name.toLowerCase().includes(name)) &&
+                (pet.age >= minAge && pet.age <= maxAge)
+            ) {
+
+                const breedName = await adoptionInstance.methods.getBreed(pet.breedId).call();
+
+                const petCard = document.createElement("div");
+                petCard.className = "pet-card";
+                petCard.innerHTML = `
+                <h3>${pet.name}</h3>
+                <img src="${pet.image}" alt="${pet.name}">
+                <p>Age: ${pet.age}</p>
+                <p>Breed: ${breedName}</p>
+                <p>Location: ${pet.location}</p>
+                <button class="btn-adopt" data-id="${i}">Adopt</button>
+            `;
+                petsContainer.appendChild(petCard);
             }
-
-            const breedName = await adoptionInstance.methods.getBreed(pet.breedId).call();
-
-            const petCard = document.createElement("div");
-            petCard.className = "pet-card";
-            petCard.innerHTML = `
-            <h3>${pet.name}</h3>
-            <img src="${pet.image}" alt="${pet.name}">
-            <p>Age: ${pet.age}</p>
-            <p>Breed: ${breedName}</p>
-            <p>Location: ${pet.location}</p>
-            <button class="btn-adopt" data-id="${i}">Adopt</button>
-        `;
-            petsContainer.appendChild(petCard);
         }
-
         App.bindEvents();
     },
 
@@ -122,7 +130,7 @@ const App = {
         formData.append("image", file);
 
         // Save the file to the server
-        const response = await fetch("http://localhost:3000/upload", { method: "POST", body: formData });
+        const response = await fetch("http://localhost:3000/upload", {method: "POST", body: formData});
         if (!response.ok) {
             alert("Failed to upload image.");
             return;
@@ -142,7 +150,7 @@ const App = {
             // Send the transaction with the dynamically fetched fee
             await adoptionInstance.methods
                 .addNewPet(name, age, breedId, location, imagePath)
-                .send({ from: account, value: addPetFee });
+                .send({from: account, value: addPetFee});
 
             alert("New pet added successfully!");
             App.loadPets(); // Reload the available pets list
@@ -158,15 +166,19 @@ const App = {
         const breedDropdown = document.getElementById("new-pet-breed");
         breedDropdown.innerHTML = ""; // Clear existing options
 
+        const filterBreedDropdown = document.getElementById("filter-breed");
+        filterBreedDropdown.innerHTML = '<option value="">All Breeds</option>';
+
         for (let i = 0; i < breedCount; i++) {
             const breedName = await adoptionInstance.methods.getBreed(i).call();
             const option = document.createElement("option");
             option.value = i; // Breed ID
             option.text = breedName;
-            breedDropdown.add(option);
+
+            breedDropdown.add(option.cloneNode(true)); // Add to add pet form
+            filterBreedDropdown.add(option.cloneNode(true)); // Add to filter form
         }
     },
-
 
 
     bindEvents: function () {
@@ -183,7 +195,7 @@ const App = {
         const account = accounts[0];
 
         try {
-            await App.adoptionContract.methods.adopt(petId).send({ from: account });
+            await App.adoptionContract.methods.adopt(petId).send({from: account});
             alert("Pet adopted successfully!");
             App.loadPets(); // Refresh the pet list
             App.loadAdoptedPets();
@@ -196,5 +208,6 @@ const App = {
 document.addEventListener("DOMContentLoaded", function () {
     App.init();
     document.getElementById("add-pet-form").addEventListener("submit", App.addNewPet);
+    document.getElementById("filter-form").addEventListener("submit", App.loadPets);
 
 });
