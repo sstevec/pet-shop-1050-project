@@ -1,0 +1,146 @@
+[
+  {
+    "id": 0,
+    "name": "Frieda",
+    "picture": "images/scottish-terrier.jpeg",
+    "age": 3,
+    "breed": "Scottish Terrier",
+    "breedId": 0,
+    "location": "Lisco, Alabama"
+  },
+  {
+    "id": 1,
+    "name": "Gina",
+    "picture": "images/scottish-terrier.jpeg",
+    "age": 3,
+    "breed": "Scottish Terrier",
+    "breedId": 0,
+    "location": "Tooleville, West Virginia"
+  },
+  {
+    "id": 2,
+    "name": "Collins",
+    "picture": "images/french-bulldog.jpeg",
+    "age": 2,
+    "breed": "French Bulldog",
+    "breedId": 1,
+    "location": "Freeburn, Idaho"
+  },
+  {
+    "id": 3,
+    "name": "Melissa",
+    "picture": "images/boxer.jpeg",
+    "age": 2,
+    "breed": "Boxer",
+    "breedId": 2,
+    "location": "Camas, Pennsylvania"
+  },
+  {
+    "id": 4,
+    "name": "Jeanine",
+    "picture": "images/french-bulldog.jpeg",
+    "age": 3,
+    "breed": "French Bulldog",
+    "breedId": 1,
+    "location": "Bramwell, West Virginia"
+  },
+  {
+    "id": 5,
+    "name": "Elvia",
+    "picture": "images/golden-retriever.jpeg",
+    "age": 4,
+    "breed": "Golden Retriever",
+    "breedId": 3,
+    "location": "Greer, South Carolina"
+  },
+  {
+    "id": 6,
+    "name": "Latisha",
+    "picture": "images/golden-retriever.jpeg",
+    "age": 5,
+    "breed": "Golden Retriever",
+    "breedId": 3,
+    "location": "Zion, Illinois"
+  },
+  {
+    "id": 7,
+    "name": "Coleman",
+    "picture": "images/scottish-terrier.jpeg",
+    "age": 6,
+    "breed": "Scottish Terrier",
+    "breedId": 0,
+    "location": "Bourbonnais, Illinois"
+  },
+  {
+    "id": 8,
+    "name": "Nichole",
+    "picture": "images/boxer.jpeg",
+    "age": 4,
+    "breed": "Boxer",
+    "breedId": 2,
+    "location": "Logan, West Virginia"
+  },
+  {
+    "id": 9,
+    "name": "Fran",
+    "picture": "images/boxer.jpeg",
+    "age": 5,
+    "breed": "Boxer",
+    "breedId": 2,
+    "location": "Neosho, Missouri"
+  },
+  {
+    "id": 10,
+    "name": "Leonor",
+    "picture": "images/golden-retriever.jpeg",
+    "age": 3,
+    "breed": "Golden Retriever",
+    "breedId": 3,
+    "location": "Fairview, Oregon"
+  },
+  {
+    "id": 11,
+    "name": "Dean",
+    "picture": "images/scottish-terrier.jpeg",
+    "age": 4,
+    "breed": "Scottish Terrier",
+    "breedId": 0,
+    "location": "Springfield, Ohio"
+  },
+  {
+    "id": 12,
+    "name": "Stevenson",
+    "picture": "images/french-bulldog.jpeg",
+    "age": 6,
+    "breed": "French Bulldog",
+    "breedId": 1,
+    "location": "Morven, Georgia"
+  },
+  {
+    "id": 13,
+    "name": "Kristina",
+    "picture": "images/french-bulldog.jpeg",
+    "age": 4,
+    "breed": "French Bulldog",
+    "breedId": 1,
+    "location": "Oxnard, California"
+  },
+  {
+    "id": 14,
+    "name": "Ethel",
+    "picture": "images/scottish-terrier.jpeg",
+    "age": 2,
+    "breed": "Scottish Terrier",
+    "breedId": 0,
+    "location": "Dover, Delaware"
+  },
+  {
+    "id": 15,
+    "name": "Terry",
+    "picture": "images/golden-retriever.jpeg",
+    "age": 3,
+    "breed": "Golden Retriever",
+    "breedId": 3,
+    "location": "Decatur, Georgia"
+  }
+]
