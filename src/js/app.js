@@ -4,7 +4,9 @@ const App = {
     contractAddress: null,
 
     init: async function () {
-        return await App.initWeb3();
+        await App.initWeb3();
+        await App.populateBreedDropdown();
+        await App.checkOwnership();
     },
 
     initWeb3: async function () {
@@ -39,8 +41,6 @@ const App = {
         // Initialize the contract
         App.contractAddress = AdoptionArtifact.networks[5777].address; // Update network ID if different
         App.adoptionContract = new web3.eth.Contract(AdoptionArtifact.abi, App.contractAddress);
-
-        await App.populateBreedDropdown();
 
         return App.loadPets();
     },
@@ -253,11 +253,62 @@ const App = {
             console.error("Error voting for pet:", error.message);
         }
     },
+
+    handleDonate: async function (event) {
+        event.preventDefault();
+
+        const amount = document.getElementById("donation-amount").value;
+        const accounts = await web3.eth.getAccounts();
+        const account = accounts[0];
+
+        const adoptionInstance = await App.adoptionContract;
+
+        try {
+            // Send the donation
+            await adoptionInstance.methods.donate().send({
+                from: account,
+                value: web3.utils.toWei(amount, "ether"),
+            });
+            alert("Thank you for your donation!");
+        } catch (error) {
+            console.error("Error during donation:", error.message);
+        }
+    },
+
+    handleWithdrawDonations: async function () {
+        const accounts = await web3.eth.getAccounts();
+        const account = accounts[0];
+
+        const adoptionInstance = await App.adoptionContract;
+
+        try {
+            // Call the withdrawDonations function
+            await adoptionInstance.methods.withdraw().send({ from: account });
+            alert("Donations withdrawn successfully!");
+        } catch (error) {
+            console.error("Error withdrawing donations:", error.message);
+        }
+    },
+    checkOwnership: async function () {
+        const accounts = await web3.eth.getAccounts();
+        const account = accounts[0];
+
+        const adoptionInstance = await App.adoptionContract;
+        const owner = await adoptionInstance.methods.owner().call();
+        console.log(account, owner)
+
+        if (account.toLowerCase() === owner.toLowerCase()) {
+            document.getElementById("withdraw-section").style.display = "block"; // Show the withdraw section
+        }
+    },
+
 };
 
 document.addEventListener("DOMContentLoaded", function () {
     App.init();
     document.getElementById("add-pet-form").addEventListener("submit", App.addNewPet);
     document.getElementById("filter-form").addEventListener("submit", App.loadPets);
+    document.getElementById("donate-form").addEventListener("submit", App.handleDonate);
+    document.getElementById("withdraw-donations").addEventListener("click", App.handleWithdrawDonations);
 
 });
