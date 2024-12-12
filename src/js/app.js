@@ -108,6 +108,7 @@ const App = {
             <p>Breed: ${breedName}</p>
             <p>Location: ${pet.location}</p>
             <p>Adopter: ${pet.adopter}</p>
+            <button class="btn-return" data-id="${i}">Return</button>
         `;
             adoptedContainer.appendChild(petCard);
         }
@@ -187,6 +188,9 @@ const App = {
         document.querySelectorAll(".btn-adopt").forEach((button) =>
             button.addEventListener("click", App.handleAdopt)
         );
+        document.querySelectorAll(".btn-return").forEach((button) =>
+            button.addEventListener("click", App.handleReturn)
+        );
         document.querySelectorAll(".btn-vote").forEach((button) =>
             button.addEventListener("click", App.handleVote)
         );
@@ -208,6 +212,29 @@ const App = {
             console.error(error.message);
         }
     },
+    handleReturn: async function (event) {
+        event.preventDefault();
+
+        const petId = parseInt(event.target.getAttribute("data-id"));
+        const accounts = await web3.eth.getAccounts();
+        const account = accounts[0];
+
+        const adoptionInstance = await App.adoptionContract;
+
+        try {
+            // Fetch the return fee (same as add pet fee)
+            const returnFee = await adoptionInstance.methods.getAddPetFee().call();
+
+            // Call the returnPet function with the fee
+            await adoptionInstance.methods.returnPet(petId).send({ from: account, value: returnFee });
+            alert("Pet returned successfully!");
+            App.loadPets(); // Reload available pets
+            App.loadAdoptedPets(); // Reload adopted pets
+        } catch (error) {
+            console.error("Error returning pet:", error.message);
+        }
+    },
+
 
     handleVote: async function (event) {
         event.preventDefault();

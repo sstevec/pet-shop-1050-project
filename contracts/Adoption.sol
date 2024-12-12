@@ -51,6 +51,26 @@ contract Adoption {
         return petId;
     }
 
+    function returnPet(uint petId) public payable {
+        require(petId >= 0 && petId < adoptedCount, "Invalid pet ID");
+        require(adoptedPets[petId].adopter == msg.sender, "Only the adopter can return the pet");
+        require(msg.value >= addPetFee, "Insufficient Ether sent for return");
+
+        // Remove the adopter
+        adoptedPets[petId].adopter = address(0);
+
+        // Add the pet back to the available list
+        pets[petCount] = adoptedPets[petId];
+        petCount++;
+
+        for (uint j = petId; j < adoptedCount - 1; j++) {
+            adoptedPets[j] = adoptedPets[j + 1];
+        }
+        delete adoptedPets[adoptedCount - 1];
+        adoptedCount--;
+
+    }
+
     function getAdoptedPet(uint adoptedPetId) public view returns (
         string memory name,
         uint age,
@@ -153,5 +173,13 @@ contract Adoption {
             pets[i] = Pet(names[i], ages[i], breedIds[i], locations[i], images[i], address(0), 0);
         }
         petCount = names.length;
+    }
+
+    function donate() public payable {
+        require(msg.value > 0, "Donation must be greater than zero");
+    }
+
+    function getBalance() public view returns (uint) {
+        return address(this).balance;
     }
 }
