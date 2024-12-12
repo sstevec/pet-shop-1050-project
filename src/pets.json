@@ -5,7 +5,6 @@
     "picture": "images/scottish-terrier.jpeg",
     "age": 3,
     "breed": "Scottish Terrier",
-    "breedId": 0,
     "location": "Lisco, Alabama"
   },
   {
@@ -14,7 +13,6 @@
     "picture": "images/scottish-terrier.jpeg",
     "age": 3,
     "breed": "Scottish Terrier",
-    "breedId": 0,
     "location": "Tooleville, West Virginia"
   },
   {
@@ -23,7 +21,6 @@
     "picture": "images/french-bulldog.jpeg",
     "age": 2,
     "breed": "French Bulldog",
-    "breedId": 1,
     "location": "Freeburn, Idaho"
   },
   {
@@ -32,7 +29,6 @@
     "picture": "images/boxer.jpeg",
     "age": 2,
     "breed": "Boxer",
-    "breedId": 2,
     "location": "Camas, Pennsylvania"
   },
   {
@@ -41,7 +37,6 @@
     "picture": "images/french-bulldog.jpeg",
     "age": 3,
     "breed": "French Bulldog",
-    "breedId": 1,
     "location": "Bramwell, West Virginia"
   },
   {
@@ -50,7 +45,6 @@
     "picture": "images/golden-retriever.jpeg",
     "age": 4,
     "breed": "Golden Retriever",
-    "breedId": 3,
     "location": "Greer, South Carolina"
   },
   {
@@ -59,7 +53,6 @@
     "picture": "images/golden-retriever.jpeg",
     "age": 5,
     "breed": "Golden Retriever",
-    "breedId": 3,
     "location": "Zion, Illinois"
   },
   {
@@ -68,7 +61,6 @@
     "picture": "images/scottish-terrier.jpeg",
     "age": 6,
     "breed": "Scottish Terrier",
-    "breedId": 0,
     "location": "Bourbonnais, Illinois"
   },
   {
@@ -77,7 +69,6 @@
     "picture": "images/boxer.jpeg",
     "age": 4,
     "breed": "Boxer",
-    "breedId": 2,
     "location": "Logan, West Virginia"
   },
   {
@@ -86,7 +77,6 @@
     "picture": "images/boxer.jpeg",
     "age": 5,
     "breed": "Boxer",
-    "breedId": 2,
     "location": "Neosho, Missouri"
   },
   {
@@ -95,7 +85,6 @@
     "picture": "images/golden-retriever.jpeg",
     "age": 3,
     "breed": "Golden Retriever",
-    "breedId": 3,
     "location": "Fairview, Oregon"
   },
   {
@@ -104,7 +93,6 @@
     "picture": "images/scottish-terrier.jpeg",
     "age": 4,
     "breed": "Scottish Terrier",
-    "breedId": 0,
     "location": "Springfield, Ohio"
   },
   {
@@ -113,7 +101,6 @@
     "picture": "images/french-bulldog.jpeg",
     "age": 6,
     "breed": "French Bulldog",
-    "breedId": 1,
     "location": "Morven, Georgia"
   },
   {
@@ -122,7 +109,6 @@
     "picture": "images/french-bulldog.jpeg",
     "age": 4,
     "breed": "French Bulldog",
-    "breedId": 1,
     "location": "Oxnard, California"
   },
   {
@@ -131,7 +117,6 @@
     "picture": "images/scottish-terrier.jpeg",
     "age": 2,
     "breed": "Scottish Terrier",
-    "breedId": 0,
     "location": "Dover, Delaware"
   },
   {
@@ -140,7 +125,6 @@
     "picture": "images/golden-retriever.jpeg",
     "age": 3,
     "breed": "Golden Retriever",
-    "breedId": 3,
     "location": "Decatur, Georgia"
   }
 ]

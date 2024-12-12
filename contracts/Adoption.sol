@@ -15,8 +15,17 @@ contract Adoption {
         string name;
     }
 
+    uint public addPetFee = 0.1 ether; // Fee for adding a new pet
+    address public owner;
+
+    constructor() public {
+        owner = 0x756574ae214517069F23287d81b1D30A7248F2F5; // has a fixed address
+    }
+
     mapping(uint => Pet) public pets; // Mapping of petId to Pet details
     mapping(uint => Breed) public breeds; // Mapping of breedId to Breed details
+    mapping(uint => Pet) public adoptedPets; // Store adopted pets
+    uint public adoptedCount; // Keep track of the number of adopted pets
     uint public breedCount; // Number of breeds
     uint public petCount;   // Number of pets
 
@@ -27,18 +36,52 @@ contract Adoption {
 
         pets[petId].adopter = msg.sender;
 
+        // Move pet to adoptedPets mapping
+        adoptedPets[adoptedCount] = pets[petId];
+        adoptedCount++;
+
+        // Shift the remaining IDs to fill the gap
+        for (uint j = petId; j < petCount - 1; j++) {
+            pets[j] = pets[j + 1];
+        }
+        delete pets[petCount - 1];
+        petCount--;
+
         return petId;
     }
 
-    function addPet(
+    function getAdoptedPet(uint adoptedPetId) public view returns (
+        string memory name,
+        uint age,
+        uint breedId,
+        string memory location,
+        string memory image,
+        address adopter
+    ) {
+        Pet memory pet = adoptedPets[adoptedPetId];
+        return (pet.name, pet.age, pet.breedId, pet.location, pet.image, pet.adopter);
+    }
+
+
+
+    function addNewPet(
         string memory name,
         uint age,
         uint breedId,
         string memory location,
         string memory image
-    ) public {
+    ) public payable {
+        require(msg.value >= addPetFee, "Insufficient Ether sent for adding a new pet");
+        require(breedId < breedCount, "Invalid breed ID");
+
+        // Add new pet to the pets mapping
         pets[petCount] = Pet(name, age, breedId, location, image, address(0));
         petCount++;
+    }
+
+    function withdraw() public {
+        require(msg.sender == owner, "Only the owner can withdraw funds");
+        msg.sender.transfer(address(this).balance);
     }
 
     function addBreed(string memory name) public {
@@ -49,6 +92,14 @@ contract Adoption {
     // Get the total number of pets
     function getPetCount() public view returns (uint) {
         return petCount;
+    }
+
+    function getAdoptedCount() public view returns (uint) {
+        return adoptedCount;
+    }
+
+    function getAddPetFee() public view returns (uint) {
+        return addPetFee;
     }
 
     // Retrieve all pet details
