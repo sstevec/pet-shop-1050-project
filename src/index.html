@@ -1,95 +1,172 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Pet Adoption</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
-  <script src="js/app.js" defer></script>
-  <style>
-    .pet-card {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin: 10px;
-      width: 300px;
-      display: inline-block;
-      text-align: center;
-    }
-    .pet-card img {
-      max-width: 100%;
-      height: auto;
-    }
-    .pet-card button {
-      margin-top: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Pet Adoption</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
 </head>
-
 <body>
-<h1>Pet Adoption</h1>
-<div>
-  <h2>Filter Pets</h2>
-  <form id="filter-form">
-    <label for="filter-breed">Breed:</label>
-    <select id="filter-breed">
-      <option value="">All Breeds</option>
-    </select><br>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+          <span class="navbar-brand">
+            Pet Adoption
+          </span>
+        </div>
+        <p class="navbar-text navbar-right"><span id="owner-badge" class="badge"
+                                                  style="display: none;">Owner</span>
+            Wallet Address: <a href="#" id="user-address" class="navbar-link"></a>
+        </p>
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Actions</h3>
+        </div>
+        <div class="panel-body">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="active">
+                    <a href="#filter-pets" role="tab" data-toggle="tab">Filter Pets</a>
+                </li>
+                <li>
+                    <a href="#add-new-pet" role="tab" data-toggle="tab">Add New Pet</a>
+                </li>
+                <li>
+                    <a href="#donate" role="tab" data-toggle="tab">Donate</a>
+                </li>
+                <li id="withdraw-section" style="display: none">
+                    <a href="#withdraw" role="tab" data-toggle="tab">Withdraw Donation</a>
+                </li>
+            </ul>
+            <br/>
+            <div class="tab-content">
+                <div class="tab-pane active" id="filter-pets">
+                    <form id="filter-form">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-inline">
+                                    <div class="input-group col-lg-3">
+                                        <div class="input-group-addon">Min age</div>
+                                        <input type="number" class="form-control"
+                                               id="filter-min-age"
+                                               placeholder="0"><br>
+                                    </div>
+                                    <div class="input-group col-lg-3">
+                                        <div class="input-group-addon">Max age</div>
+                                        <input type="number" class="form-control"
+                                               id="filter-max-age"
+                                               placeholder="99"><br>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <select class="btn btn-default dropdown-toggle"
+                                                id="filter-breed">
+                                            <option value="">All Breeds</option>
+                                        </select>
+                                    </div><!-- /btn-group -->
+                                    <input type="text" class="form-control" id="filter-name"
+                                           placeholder="Enter pet name">
+                                    <span class="input-group-btn">
+                            <button class="btn btn-primary" type="submit" id="apply-filters">Apply Filters</button>
+                        </span>
+                                </div><!-- /input-group -->
+                            </div><!-- /.col-lg-6 -->
+                        </div><!-- /.row -->
+                    </form>
+                </div>
+                <div class="tab-pane" id="add-new-pet">
+                    <form id="add-pet-form" class="form-inline">
+                        <div class="input-group">
+                            <span class="input-group-addon">Name</span>
+                            <input type="text" id="new-pet-name" class="form-control" required>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon">Age</span>
+                            <input type="number" class="form-control" id="new-pet-age" required>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon">Breed</span>
+                            <select class="form-control" id="new-pet-breed" required></select>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon">Location</span>
+                            <input type="text" class="form-control" id="new-pet-location"
+                                   required><br>
+                        </div>
 
-    <label for="filter-name">Name:</label>
-    <input type="text" id="filter-name" placeholder="Enter pet name"><br>
+                        <div class="input-group">
+                            <span class="input-group-addon">Image</span>
+                            <input type="file" class="form-control" id="new-pet-image"
+                                   accept="image/*" required>
+                        </div>
 
-    <label for="filter-min-age">Min Age:</label>
-    <input type="number" id="filter-min-age" placeholder="0"><br>
+                        <button class="btn btn-primary" type="submit" id="add-pet-button">Add Pet
+                        </button>
+                    </form>
+                </div>
+                <div class="tab-pane" id="donate">
+                    <p>Support the Pet Shop</p>
+                    <form id="donate-form">
+                        <div class="input-group">
+                            <span class="input-group-addon">ETH</span>
+                            <input type="text" id="donation-amount" class="form-control"
+                                   placeholder="0.1">
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="submit">
+                                    Donate
+                                </button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                <div class="tab-pane" id="withdraw">
+                    <button class="btn btn-primary" id="withdraw-donations">Withdraw Funds</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <label for="filter-max-age">Max Age:</label>
-    <input type="number" id="filter-max-age" placeholder="99"><br>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Pets</h3>
+        </div>
+        <div class="panel-body">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="active">
+                    <a href="#available-pets-tab" role="tab" data-toggle="tab">Available</a>
+                </li>
+                <li>
+                    <a href="#adopted-tab" role="tab" data-toggle="tab">Adopted</a>
+                </li>
+            </ul>
 
-    <button type="submit" id="apply-filters">Apply Filters</button>
-  </form>
+            <div class="tab-content">
+                <div class="tab-pane active" id="available-pets-tab">
+                    <div class="row" id="pets-container">
+                        <p>No available pets yet</p>
+                    </div>
+                </div>
+                <div class="tab-pane" id="adopted-tab">
+                    <div class="row" id="adopted-container">
+                        <p>No adopted pets yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-  <h2>Available Pets</h2>
-  <div id="pets-container"></div>
-</div>
 
-<div>
-  <h2>Adopted Pets</h2>
-  <div id="adopted-container"></div>
-</div>
-
-<div>
-  <h2>Add New Pet</h2>
-  <form id="add-pet-form">
-    <label for="new-pet-name">Name:</label>
-    <input type="text" id="new-pet-name" required><br>
-
-    <label for="new-pet-age">Age:</label>
-    <input type="number" id="new-pet-age" required><br>
-
-    <label for="new-pet-breed">Breed:</label>
-    <select id="new-pet-breed" required></select><br> <!-- Dropdown for breeds -->
-
-    <label for="new-pet-location">Location:</label>
-    <input type="text" id="new-pet-location" required><br>
-
-    <label for="new-pet-image">Upload Image:</label>
-    <input type="file" id="new-pet-image" accept="image/*" required><br>
-
-    <button type="submit" id="add-pet-button">Add Pet</button>
-  </form>
-</div>
-
-<div>
-  <h2>Support the Pet Shop</h2>
-  <form id="donate-form">
-    <label for="donation-amount">Amount (ETH):</label>
-    <input type="number" id="donation-amount" placeholder="0.1" required>
-    <button type="submit">Donate</button>
-  </form>
-</div>
-<div id="withdraw-section" style="display: none;">
-  <h2>Withdraw Donations</h2>
-  <button id="withdraw-donations">Withdraw Funds</button>
-</div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="js/bootstrap.min.js"></script>
+<script src="js/app.js" defer></script>
 </body>
 </html>

@@ -1,15 +1,13 @@
 const App = {
-    web3Provider: null,
-    adoptionContract: null,
-    contractAddress: null,
+    web3Provider: null, adoptionContract: null, contractAddress: null,
 
-    init: async function () {
+    init: async function() {
         await App.initWeb3();
         await App.populateBreedDropdown();
         await App.checkOwnership();
     },
 
-    initWeb3: async function () {
+    initWeb3: async function() {
         // Modern dapp browsers
         if (window.ethereum) {
             App.web3Provider = window.ethereum;
@@ -19,6 +17,15 @@ const App = {
             } catch (error) {
                 console.error("User denied account access");
             }
+
+            App.web3Provider.on("accountsChanged", (accounts) => {
+                if (accounts.length > 0) {
+                    console.log("Account changed to:", accounts[0]);
+                    location.reload();
+                } else {
+                    console.warn("No account connected");
+                }
+            });
         }
         // Legacy dapp browsers
         else if (window.web3) {
@@ -33,7 +40,7 @@ const App = {
         return App.initContract();
     },
 
-    initContract: async function () {
+    initContract: async function() {
         // Load the contract artifact
         const response = await fetch("Adoption.json");
         const AdoptionArtifact = await response.json();
@@ -42,79 +49,95 @@ const App = {
         App.contractAddress = AdoptionArtifact.networks[5777].address; // Update network ID if different
         App.adoptionContract = new web3.eth.Contract(AdoptionArtifact.abi, App.contractAddress);
 
-        return App.loadPets();
+        await App.loadAdoptedPets();
+
+        return await App.loadPets();
     },
 
-    loadPets: async function (event) {
+    generatePetCard: ({name, image, age, location, adopter, breedName, voteCount, petId}) => `
+<div class="col-sm-4 col-md-3 col-lg-2">
+    <div class="thumbnail">
+        <img src="${image}" alt="${name}">
+        <div class="caption">
+            <h3>${name}</h3>
+            <table class="table">
+                <tr>
+                    <td>Age</td>
+                    <td>${age}</td>
+                </tr>
+                <tr>
+                    <td>Breed</td>
+                    <td>${breedName}</td>
+                </tr>
+                <tr>
+                    <td>Location</td>
+                    <td>${location}</td>
+                </tr>
+                ${"0x0000000000000000000000000000000000000000" === adopter ? "" : `<tr>
+                    <td>Adopter</td>
+                    <td style="word-wrap: anywhere">${adopter}</td>
+                </tr>`}
+            </table>
+            ${"undefined" === typeof voteCount
+        ? ""
+        : `<button class="btn btn-primary btn-adopt" data-id="${petId}">Adopt</button>
+                         <button class="btn btn-default btn-vote" data-id="${petId}">
+                            Vote <span class="badge">${voteCount}</span>
+                         </button>`}
+            </button>
+        </div>
+    </div>
+</div>
+`,
+
+    loadPets: async function(event) {
         if (event) event.preventDefault();
         const adoptionInstance = await App.adoptionContract;
 
-        const breedId = document.getElementById("filter-breed").value;
-        const name = document.getElementById("filter-name").value.toLowerCase();
-        const minAge = parseInt(document.getElementById("filter-min-age").value) || 0;
-        const maxAge = parseInt(document.getElementById("filter-max-age").value) || 99;
+        const breedId = $("#filter-breed").val();
+        const name = $("#filter-name").val().toLowerCase();
+        const minAge = parseInt($("#filter-min-age").val()) || Number("-Infinity");
+        const maxAge = parseInt($("#filter-max-age").val()) || Number("Infinity");
 
         const petCount = await adoptionInstance.methods.getPetCount().call();
-
-        const petsContainer = document.getElementById("pets-container");
-        petsContainer.innerHTML = "";
+        console.log(petCount);
+        const petsContainer = $("#pets-container").empty();
 
         for (let i = 0; i < petCount; i++) {
             const pet = await adoptionInstance.methods.getPet(i).call();
+            console.log((breedId === "" || pet.breedId === breedId),
+                (name === "" || pet.name.toLowerCase().includes(name)),
+                (pet.age >= minAge && pet.age <= maxAge),
+            );
 
-            if (
-                (breedId === "" || pet.breedId === breedId) &&
+            if ((breedId === "" || pet.breedId === breedId) &&
                 (name === "" || pet.name.toLowerCase().includes(name)) &&
-                (pet.age >= minAge && pet.age <= maxAge)
-            ) {
-
+                (pet.age >= minAge && pet.age <= maxAge)) {
                 const breedName = await adoptionInstance.methods.getBreed(pet.breedId).call();
                 const voteCount = await adoptionInstance.methods.getVoteCount(i).call();
 
-                const petCard = document.createElement("div");
-                petCard.className = "pet-card";
-                petCard.innerHTML = `
-                <h3>${pet.name} (Votes: ${voteCount})</h3>
-                <img src="${pet.image}" alt="${pet.name}">
-                <p>Age: ${pet.age}</p>
-                <p>Breed: ${breedName}</p>
-                <p>Location: ${pet.location}</p>
-                <button class="btn-adopt" data-id="${i}">Adopt</button>
-                <button class="btn-vote" data-id="${i}">Vote</button>
-            `;
-                petsContainer.appendChild(petCard);
+                petsContainer.append(App.generatePetCard({
+                    ...pet, breedName, voteCount, petId: i,
+                }));
             }
         }
         App.bindEvents();
     },
 
-    loadAdoptedPets: async function () {
+    loadAdoptedPets: async function() {
         const adoptionInstance = await App.adoptionContract;
         const adoptedCount = await adoptionInstance.methods.getAdoptedCount().call();
 
-        const adoptedContainer = document.getElementById("adopted-container");
-        adoptedContainer.innerHTML = "";
+        const adoptedContainer = $("#adopted-container").empty();
 
         for (let i = 0; i < adoptedCount; i++) {
             const pet = await adoptionInstance.methods.getAdoptedPet(i).call();
             const breedName = await adoptionInstance.methods.getBreed(pet.breedId).call();
-
-            const petCard = document.createElement("div");
-            petCard.className = "pet-card";
-            petCard.innerHTML = `
-            <h3>${pet.name}</h3>
-            <img src="${pet.image}" alt="${pet.name}">
-            <p>Age: ${pet.age}</p>
-            <p>Breed: ${breedName}</p>
-            <p>Location: ${pet.location}</p>
-            <p>Adopter: ${pet.adopter}</p>
-            <button class="btn-return" data-id="${i}">Return</button>
-        `;
-            adoptedContainer.appendChild(petCard);
+            adoptedContainer.append(App.generatePetCard({...pet, breedName, petId: i}));
         }
     },
 
-    addNewPet: async function (event) {
+    addNewPet: async function(event) {
         event.preventDefault();
 
         const name = document.getElementById("new-pet-name").value;
@@ -133,7 +156,8 @@ const App = {
         formData.append("image", file);
 
         // Save the file to the server
-        const response = await fetch("http://localhost:3000/upload", {method: "POST", body: formData});
+        const response = await fetch("http://localhost:3000/upload",
+            {method: "POST", body: formData});
         if (!response.ok) {
             alert("Failed to upload image.");
             return;
@@ -151,18 +175,17 @@ const App = {
             const addPetFee = await adoptionInstance.methods.getAddPetFee().call();
 
             // Send the transaction with the dynamically fetched fee
-            await adoptionInstance.methods
-                .addNewPet(name, age, breedId, location, imagePath)
-                .send({from: account, value: addPetFee});
+            await adoptionInstance.methods.addNewPet(name, age, breedId, location, imagePath).
+                send({from: account, value: addPetFee});
 
             alert("New pet added successfully!");
-            App.loadPets(); // Reload the available pets list
+            await App.loadPets(); // Reload the available pets list
         } catch (error) {
             console.error("Error adding new pet:", error.message);
         }
     },
 
-    populateBreedDropdown: async function () {
+    populateBreedDropdown: async function() {
         const adoptionInstance = App.adoptionContract;
         const breedCount = await adoptionInstance.methods.breedCount().call();
 
@@ -170,7 +193,7 @@ const App = {
         breedDropdown.innerHTML = ""; // Clear existing options
 
         const filterBreedDropdown = document.getElementById("filter-breed");
-        filterBreedDropdown.innerHTML = '<option value="">All Breeds</option>';
+        filterBreedDropdown.innerHTML = "<option value=\"\">All Breeds</option>";
 
         for (let i = 0; i < breedCount; i++) {
             const breedName = await adoptionInstance.methods.getBreed(i).call();
@@ -183,22 +206,15 @@ const App = {
         }
     },
 
-
-    bindEvents: function () {
-        document.querySelectorAll(".btn-adopt").forEach((button) =>
-            button.addEventListener("click", App.handleAdopt)
-        );
-        document.querySelectorAll(".btn-return").forEach((button) =>
-            button.addEventListener("click", App.handleReturn)
-        );
-        document.querySelectorAll(".btn-vote").forEach((button) =>
-            button.addEventListener("click", App.handleVote)
-        );
+    bindEvents: function() {
+        $(document).on("click", ".btn-adopt", App.handleAdopt);
+        $(document).on("click", ".btn-return", App.handleReturn);
+        $(document).on("click", ".btn-vote", App.handleVote);
     },
 
-    handleAdopt: async function (event) {
+    handleAdopt: async function(event) {
         event.preventDefault();
-        const petId = parseInt(event.target.getAttribute("data-id"));
+        const petId = parseInt($(event.target).data("id"));
 
         const accounts = await web3.eth.getAccounts();
         const account = accounts[0];
@@ -206,13 +222,12 @@ const App = {
         try {
             await App.adoptionContract.methods.adopt(petId).send({from: account});
             alert("Pet adopted successfully!");
-            App.loadPets(); // Refresh the pet list
-            App.loadAdoptedPets();
+            await App.loadPets();
+            await App.loadAdoptedPets();
         } catch (error) {
             console.error(error.message);
         }
-    },
-    handleReturn: async function (event) {
+    }, handleReturn: async function(event) {
         event.preventDefault();
 
         const petId = parseInt(event.target.getAttribute("data-id"));
@@ -226,17 +241,16 @@ const App = {
             const returnFee = await adoptionInstance.methods.getAddPetFee().call();
 
             // Call the returnPet function with the fee
-            await adoptionInstance.methods.returnPet(petId).send({ from: account, value: returnFee });
+            await adoptionInstance.methods.returnPet(petId).send({from: account, value: returnFee});
             alert("Pet returned successfully!");
-            App.loadPets(); // Reload available pets
-            App.loadAdoptedPets(); // Reload adopted pets
+            await App.loadPets(); // Reload available pets
+            await App.loadAdoptedPets(); // Reload adopted pets
         } catch (error) {
             console.error("Error returning pet:", error.message);
         }
     },
 
-
-    handleVote: async function (event) {
+    handleVote: async function(event) {
         event.preventDefault();
 
         const petId = parseInt(event.target.getAttribute("data-id"));
@@ -246,15 +260,15 @@ const App = {
         const adoptionInstance = await App.adoptionContract;
 
         try {
-            await adoptionInstance.methods.voteForPet(petId).send({ from: account });
+            await adoptionInstance.methods.voteForPet(petId).send({from: account});
             alert("Vote cast successfully!");
-            App.loadPets(); // Reload the pet list to update vote counts
+            await App.loadPets(); // Reload the pet list to update vote counts
         } catch (error) {
             console.error("Error voting for pet:", error.message);
         }
     },
 
-    handleDonate: async function (event) {
+    handleDonate: async function(event) {
         event.preventDefault();
 
         const amount = document.getElementById("donation-amount").value;
@@ -266,8 +280,7 @@ const App = {
         try {
             // Send the donation
             await adoptionInstance.methods.donate().send({
-                from: account,
-                value: web3.utils.toWei(amount, "ether"),
+                from: account, value: web3.utils.toWei(amount, "ether"),
             });
             alert("Thank you for your donation!");
         } catch (error) {
@@ -275,7 +288,7 @@ const App = {
         }
     },
 
-    handleWithdrawDonations: async function () {
+    handleWithdrawDonations: async function() {
         const accounts = await web3.eth.getAccounts();
         const account = accounts[0];
 
@@ -283,32 +296,36 @@ const App = {
 
         try {
             // Call the withdrawDonations function
-            await adoptionInstance.methods.withdraw().send({ from: account });
+            await adoptionInstance.methods.withdraw().send({from: account});
             alert("Donations withdrawn successfully!");
         } catch (error) {
             console.error("Error withdrawing donations:", error.message);
         }
     },
-    checkOwnership: async function () {
+
+    checkOwnership: async function() {
         const accounts = await web3.eth.getAccounts();
         const account = accounts[0];
 
         const adoptionInstance = await App.adoptionContract;
         const owner = await adoptionInstance.methods.owner().call();
-        console.log(account, owner)
+        console.log(account, owner);
+
+        $("#user-address").text(account);
 
         if (account.toLowerCase() === owner.toLowerCase()) {
-            document.getElementById("withdraw-section").style.display = "block"; // Show the withdraw section
+            $("#owner-badge").show();
+            $("#withdraw-section").show();
         }
     },
 
 };
 
-document.addEventListener("DOMContentLoaded", function () {
-    App.init();
-    document.getElementById("add-pet-form").addEventListener("submit", App.addNewPet);
-    document.getElementById("filter-form").addEventListener("submit", App.loadPets);
-    document.getElementById("donate-form").addEventListener("submit", App.handleDonate);
-    document.getElementById("withdraw-donations").addEventListener("click", App.handleWithdrawDonations);
-
+$(document).ready(function() {
+    App.init().then(() => {
+        $("#add-pet-form").on("submit", App.addNewPet);
+        $("#filter-form").on("submit", App.loadPets);
+        $("#donate-form").on("submit", App.handleDonate);
+        $("#withdraw-donations").on("click", App.handleWithdrawDonations);
+    });
 });
