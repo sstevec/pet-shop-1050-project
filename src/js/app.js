@@ -76,6 +76,7 @@ const App = {
                 ${"0x0000000000000000000000000000000000000000" === adopter ? "" : `<tr>
                     <td>Adopter</td>
                     <td style="word-wrap: anywhere">${adopter}</td>
+                    <button class="btn btn-primary btn-return" data-id="${petId}">Return</button>
                 </tr>`}
             </table>
             ${"undefined" === typeof voteCount
@@ -121,7 +122,6 @@ const App = {
                 }));
             }
         }
-        App.bindEvents();
     },
 
     loadAdoptedPets: async function() {
@@ -207,10 +207,13 @@ const App = {
     },
 
     bindEvents: function() {
-        $(document).on("click", ".btn-adopt", App.handleAdopt);
-        $(document).on("click", ".btn-return", App.handleReturn);
-        $(document).on("click", ".btn-vote", App.handleVote);
+        // Delegate events to dynamically created elements
+        $("#pets-container").on("click", ".btn-vote", App.handleVote);
+        $("#pets-container").on("click", ".btn-adopt", App.handleAdopt);
+
+        $("#adopted-container").on("click", ".btn-return", App.handleReturn);
     },
+
 
     handleAdopt: async function(event) {
         event.preventDefault();
@@ -323,6 +326,7 @@ const App = {
 
 $(document).ready(function() {
     App.init().then(() => {
+        App.bindEvents();
         $("#add-pet-form").on("submit", App.addNewPet);
         $("#filter-form").on("submit", App.loadPets);
         $("#donate-form").on("submit", App.handleDonate);
