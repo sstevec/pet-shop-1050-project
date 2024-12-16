@@ -20,7 +20,7 @@ contract Adoption {
     address public owner;
 
     constructor() public {
-        owner = 0x756574ae214517069F23287d81b1D30A7248F2F5; // has a fixed address
+        owner = msg.sender; // The account deploying the contract becomes the owner
     }
 
     mapping(uint => Pet) public pets; // Mapping of petId to Pet details
